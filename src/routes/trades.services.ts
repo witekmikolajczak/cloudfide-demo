@@ -32,7 +32,10 @@ function toTimestamp(dateStr:string){
     return parse(dateStr, 'MM/dd/yyyy', new Date()).getTime();
 }
 
-const fetchBinanceData = async ({symbol, startTime, endTime}: Params):Promise<AggTradesResponse[]> => {
+/**
+ * Fetch aggTrades data from Binance
+ */
+export const fetchBinanceData = async ({symbol, startTime, endTime}: Params):Promise<AggTradesResponse[]> => {
     try{
         const startTimestamp= toTimestamp(startTime);
         const endTimestamp= endTime ? toTimestamp(endTime): Date.now();
@@ -46,6 +49,8 @@ const fetchBinanceData = async ({symbol, startTime, endTime}: Params):Promise<Ag
                 }}
         )
 
+        console.log(aggTradesResponse)
+
         if(aggTradesResponse.status !== 200) throw new Error(
             `Error fetching aggTrades for symbol ${symbol} from ${startTime} to ${endTime}`
         )
@@ -57,7 +62,10 @@ const fetchBinanceData = async ({symbol, startTime, endTime}: Params):Promise<Ag
     }
 }
 
-const getLowestAndHighestPrice = (data: AggTradesResponse[]): LowestAndHighestPrice => {
+/**
+ * Get the lowest and highest price from the aggTrades data
+ */
+export const getLowestAndHighestPrice = (data: AggTradesResponse[]): LowestAndHighestPrice => {
     const lowestPrice = data.reduce((acc, trade) => Math.min(acc, Number(trade.p)), Number.MAX_SAFE_INTEGER)
     const highestPrice = data.reduce((acc, trade) => Math.max(acc, Number(trade.p)), Number.MIN_SAFE_INTEGER)
     const priceChangeInPercentage = ((highestPrice - lowestPrice) / lowestPrice) * 100
