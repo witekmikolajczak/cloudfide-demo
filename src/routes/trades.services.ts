@@ -5,6 +5,7 @@ type Params = {
     symbol: string,
     startTime: string,
     endTime?: string | undefined,
+    limit?: number | undefined,
 }
 
 type AggTradesResponse = {
@@ -24,6 +25,9 @@ type LowestAndHighestPrice = {
     priceChangeInPercentage: number
 }
 
+const BINANCE_AGG_ENDPOINT = '/api/v3/aggTrades'
+
+
 /**
  * Convert a date string to timestamp
  * eg. 02/13/2009
@@ -35,21 +39,21 @@ function toTimestamp(dateStr:string){
 /**
  * Fetch aggTrades data from Binance
  */
-export const fetchBinanceData = async ({symbol, startTime, endTime}: Params):Promise<AggTradesResponse[]> => {
+export const fetchBinanceData = async ({symbol, startTime, endTime, limit}: Params):Promise<AggTradesResponse[]> => {
     try{
         const startTimestamp= toTimestamp(startTime);
         const endTimestamp= endTime ? toTimestamp(endTime): Date.now();
 
-        const aggTradesResponse = await client.get<AggTradesResponse[]>('/api/v3/aggTrades',
+        const aggTradesResponse = await client.get<AggTradesResponse[]>(BINANCE_AGG_ENDPOINT,
             {params: {
                     symbol,
                     startTime: startTimestamp,
                     endTime: endTimestamp,
-                    limit: 500,
+                    limit,
                 }}
         )
 
-        console.log(aggTradesResponse)
+        console.log('[Binance] aggTrades response status', aggTradesResponse.status)
 
         if(aggTradesResponse.status !== 200) throw new Error(
             `Error fetching aggTrades for symbol ${symbol} from ${startTime} to ${endTime}`
@@ -74,9 +78,9 @@ export const getLowestAndHighestPrice = (data: AggTradesResponse[]): LowestAndHi
 }
 
 export const fetchAggTradesFromBinance = async (
-    {symbol, startTime, endTime}:Params
+    {symbol, startTime, endTime, limit}:Params
 ) => {
-    const binanceAggDataResponse = await fetchBinanceData({symbol, startTime, endTime});
+    const binanceAggDataResponse = await fetchBinanceData({symbol, startTime, endTime, limit});
     const {lowestPrice, highestPrice, priceChangeInPercentage} = getLowestAndHighestPrice(binanceAggDataResponse)
 
     console.log('Lowest Price: ', lowestPrice, '\nHighest Price: ', highestPrice, ' \nPrice Change: ', priceChangeInPercentage, '%')

@@ -1,4 +1,4 @@
-import express, {Request, Response} from 'express'
+import express from 'express'
 
 import tradesRoutes from "./routes/trades.routes";
 import {config} from "./config";
@@ -16,7 +16,7 @@ app.use('/health', (_, res) => {
 app.use(tradesRoutes);
 
 function main() {
-    app.listen(config.PORT, () => console.log(`Server is running on port ${config.PORT}!`))
+    app.listen(config.PORT, () => console.log(`[Server] Server is running on port http://localhost:${config.PORT}!`))
 }
 
 main()
