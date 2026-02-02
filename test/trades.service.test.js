@@ -3,7 +3,7 @@ require('ts-node/register');
 
 const { expect } = require('chai');
 const nock = require('nock');
-const { fetchBinanceData } = require('../src/routes/trades.services');
+const { fetchBinanceData, getLowestAndHighestPrice } = require('../src/routes/trades.services');
 
 const mockedBinanceResponse = [
   {
@@ -63,6 +63,13 @@ describe('Binance API client', () => {
 
     expect(res).to.deep.equal(mockedBinanceResponse);
   });
+
+  it('should return formatted data with price highest and lowest price different expressed in %', async () => {
+      const res = await fetchBinanceData({symbol: 'BTCUSDT', startTime: '02/02/2026', endTime: '02/03/2026'})
+      const formattedData = getLowestAndHighestPrice(res)
+
+      expect(formattedData).to.deep.equal({lowestPrice: 20133.12, highestPrice: 20133.2, priceChangeInPercentage: 0.0003973552037724219})
+  })
 });
 
 
