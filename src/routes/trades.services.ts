@@ -37,6 +37,14 @@ function toTimestamp(dateStr:string){
 }
 
 /**
+ * Method to get all available symbols from Binance
+ * used for validation if input symbol is valid
+ */
+const getAvailableSymbols = async () => {
+    const symbolsResponse = await client.get('/api/v3/exchangeInfo')
+    return symbolsResponse.data.symbols.map((symbol:any) => symbol.symbol)
+}
+/**
  * Fetch aggTrades data from Binance
  */
 export const fetchBinanceData = async ({symbol, startTime, endTime, limit}: Params):Promise<AggTradesResponse[]> => {
@@ -80,6 +88,10 @@ export const getLowestAndHighestPrice = (data: AggTradesResponse[]): LowestAndHi
 export const fetchAggTradesFromBinance = async (
     {symbol, startTime, endTime, limit}:Params
 ) => {
+    const availableSymbols = await getAvailableSymbols();
+
+    if(!availableSymbols.includes(symbol)) throw new Error(`Symbol ${symbol} is not available on Binance`)
+
     const binanceAggDataResponse = await fetchBinanceData({symbol, startTime, endTime, limit});
     const {lowestPrice, highestPrice, priceChangeInPercentage} = getLowestAndHighestPrice(binanceAggDataResponse)
 
